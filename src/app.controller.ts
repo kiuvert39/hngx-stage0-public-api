@@ -8,6 +8,11 @@ export class NumberClassificationController {
 
   @Get('classify-number')
   async classifyNumber(@Query('number') num: string) {
+
+    if (!/^-?\d+$/.test(num)) {
+      // The entire string must consist solely of an optional '-' and digits
+      throw new BadRequestException({ error: true, number: num });
+    }
     const number = parseInt(num, 10);
     if (isNaN(number)) {
       throw new BadRequestException({ error: true, number: num  });
