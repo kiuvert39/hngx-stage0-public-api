@@ -67,7 +67,8 @@ export class NumberClassificationService {
   }
 
   private sumDigits(number: number) {
-    return number
+    const absNum = Math.abs(number); // Ensure negative numbers are handled correctly
+    return absNum
       .toString()
       .split('')
       .map(Number)
@@ -83,7 +84,7 @@ export class NumberClassificationService {
       const response = await axios.get(`http://numbersapi.com/${num}/math?json`);
       await this.cacheManager.set(`funfact:${num}`, response.data.text, 86400);
       return response.data.text;
-      
+
     } catch (error) {
       return 'Fun fact not available at the moment.';
     }
