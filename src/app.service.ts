@@ -1,9 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class NumberClassificationService {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
   async classifyNumber(number: number) {
+    const cachedResult = await this.cacheManager.get(`number:${number}`);
+    if (cachedResult) {
+      return cachedResult; // Return cached response if exists
+    }
+
     const isPrime = this.isPrime(number);
     const isPerfect = this.isPerfect(number);
     const isArmstrong = this.isArmstrong(number);
@@ -16,7 +25,7 @@ export class NumberClassificationService {
     if (isArmstrong) properties.push('armstrong');
     properties.push(isOdd ? 'odd' : 'even');
 
-    return {
+    const result = {
       number,
       is_prime: isPrime,
       is_perfect: isPerfect,
@@ -24,6 +33,9 @@ export class NumberClassificationService {
       digit_sum: digitSum,
       fun_fact: funFact,
     };
+    await this.cacheManager.set(`number:${number}`, result, 3600);
+    return result;
+
   }
 
   private isPrime(number: number) {
@@ -64,8 +76,14 @@ export class NumberClassificationService {
 
   private async getFunFact(num: number): Promise<string> {
     try {
+
+      const cachedFact = await this.cacheManager.get(`funfact:${num}`);
+      if (cachedFact) return cachedFact as string;
+
       const response = await axios.get(`http://numbersapi.com/${num}/math?json`);
+      await this.cacheManager.set(`funfact:${num}`, response.data.text, 86400);
       return response.data.text;
+      
     } catch (error) {
       return 'Fun fact not available at the moment.';
     }
