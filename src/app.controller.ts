@@ -10,7 +10,7 @@ export class NumberClassificationController {
   async classifyNumber(@Query('number') num: string) {
     const number = parseInt(num, 10);
     if (isNaN(number)) {
-      throw new BadRequestException({ number: num, error: true });
+      throw new BadRequestException({ error: true, number: num  });
     }
     return await this.numberService.classifyNumber(number);
   }

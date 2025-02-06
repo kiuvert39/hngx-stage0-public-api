@@ -34,21 +34,24 @@ export class NumberClassificationService {
     return true;
   }
 
-  private isPerfect(number: number) {
-    if (number < 1) return false;
-
-    let sum = 0;
-    for (let i = 1; i < number; i++) {
-      if (number % i === 0) sum += i;
+  private isPerfect(number: number) : boolean {
+    if (number < 2) return false;
+    let sum = 1;
+    for (let i = 2; i * i <= number; i++) {
+        if (number % i === 0) {
+            sum += i;
+            if (i !== number / i) sum += number / i;
+        }
     }
     return sum === number;
   }
 
   private isArmstrong(number: number) {
-    const digits = number.toString().split('').map(Number);
+    const absNum = Math.abs(number); // Handle negatives properly
+    const digits = absNum.toString().split('');
     const power = digits.length;
-    const sum = digits.reduce((acc, digit) => acc + digit ** power, 0);
-    return sum === number;
+    const sum = digits.reduce((acc, digit) => acc + Math.pow(parseInt(digit), power), 0);
+    return sum === absNum;
   }
 
   private sumDigits(number: number) {
